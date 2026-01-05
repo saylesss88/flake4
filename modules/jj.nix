@@ -1,5 +1,4 @@
-{ ... }:
-{
+_: {
   programs.jujutsu = {
     enable = true;
     settings = {
@@ -51,12 +50,12 @@
         ];
       };
       aliases = {
-        c = [ "commit" ];
+        c = ["commit"];
         ci = [
           "commit"
           "--interactive"
         ];
-        e = [ "edit" ];
+        e = ["edit"];
         i = [
           "git"
           "init"
@@ -112,14 +111,13 @@
           "push"
           "--all"
         ];
-        r = [ "rebase" ];
-        s = [ "squash" ];
+        r = ["rebase"];
+        s = ["squash"];
         si = [
           "squash"
           "--interactive"
         ];
       };
     };
-
   };
 }

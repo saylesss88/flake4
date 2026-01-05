@@ -1,12 +1,11 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   home.username = "jr";
   home.homeDirectory = "/home/jr";
   home.stateVersion = "26.05";
 
   imports = [
     ./modules/jj.nix
+    # ./modules/editors/helix
   ];
 
   programs.home-manager.enable = true;
@@ -14,6 +13,7 @@
   home.packages = with pkgs; [
     nixd
     nixfmt
+    nixpkgs-review
     prettier
     prettierd
     harper
@@ -30,12 +30,18 @@
     ripgrep
     fd
     bat
-
+    zoxide
+    eza
   ];
 
   programs = {
     git.enable = true;
     yazi.enable = true;
     ghostty.enable = true;
+    helix.enable = true;
   };
+
+  # custom = {
+  #   helix.enable = true;
+  # };
 }
