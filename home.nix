@@ -32,6 +32,7 @@
     bat
     zoxide
     eza
+    starship
   ];
 
   programs = {
