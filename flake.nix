@@ -8,52 +8,60 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     systems.url = "github:nix-systems/default-linux";
+    rmatrix-snowfall.url = "github:saylesss88/rmatrix-snowfall";
+    randpaper.url = "github:saylesss88/randpaper";
+    slasher-horrorscripts.url = "github:saylesss88/slasher-horrorscripts";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    flatpaks.url = "github:in-a-dil-emma/declarative-flatpak/latest";
+    awww.url = "git+https://codeberg.org/LGFae/awww";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    home-manager,
-    systems,
-    treefmt-nix,
-    ...
-  } @ inputs: let
-    system = "x86_64-linux";
-    username = "jr";
-    pkgs = nixpkgs.legacyPackages.${system};
-    inherit (nixpkgs) lib;
-    forEachSystem = f: lib.genAttrs (import systems) (system: f pkgsFor.${system});
-    pkgsFor = lib.genAttrs (import systems) (
-      system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      systems,
+      treefmt-nix,
+      ...
+    }@inputs:
+    let
+      system = "x86_64-linux";
+      username = "jr";
+      pkgs = nixpkgs.legacyPackages.${system};
+      inherit (nixpkgs) lib;
+      forEachSystem = f: lib.genAttrs (import systems) (system: f pkgsFor.${system});
+      pkgsFor = lib.genAttrs (import systems) (
+        system:
         import nixpkgs {
           inherit system;
           config = {
             allowUnfree = true;
           };
         }
-    );
-    getTreefmtEval = system: treefmt-nix.lib.evalModule pkgsFor.${system} ./lib/treefmt.nix;
-  in {
-    # Formatter for nix fmt
-    formatter = forEachSystem (
-      pkgs: (getTreefmtEval pkgs.stdenv.hostPlatform.system).config.build.wrapper
-    );
+      );
+      getTreefmtEval = system: treefmt-nix.lib.evalModule pkgsFor.${system} ./lib/treefmt.nix;
+    in
+    {
+      # Formatter for nix fmt
+      formatter = forEachSystem (
+        pkgs: (getTreefmtEval pkgs.stdenv.hostPlatform.system).config.build.wrapper
+      );
 
-    # Style check for CI
-    checks = forEachSystem (pkgs: {
-      style = (getTreefmtEval pkgs.stdenv.hostPlatform.system).config.build.check self;
-      # no-todos = (getTreeFmtEval pkgs.stdenv.hostPlatform.system).config.checks.no-todos.check self;
-    });
+      # Style check for CI
+      checks = forEachSystem (pkgs: {
+        style = (getTreefmtEval pkgs.stdenv.hostPlatform.system).config.build.check self;
+        # no-todos = (getTreeFmtEval pkgs.stdenv.hostPlatform.system).config.checks.no-todos.check self;
+      });
 
-    # Development shell
-    devShells.${system}.default = import ./lib/dev-shell.nix {inherit inputs;};
+      # Development shell
+      devShells.${system}.default = import ./lib/dev-shell.nix { inherit inputs; };
 
-    homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      modules = [./home.nix];
+      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [ ./home.nix ];
 
-      extraSpecialArgs = {inherit inputs;};
+        extraSpecialArgs = { inherit inputs; };
+      };
     };
-  };
 }
